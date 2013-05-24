@@ -220,8 +220,13 @@ v8_to_msgpack(Handle<Value> v8obj, msgpack_object *mo, msgpack_zone *mz,
         for (uint32_t i = 0; i < a->Length(); i++) {
             Local<Value> k = a->Get(i);
 
-            v8_to_msgpack(k, &mo->via.map.ptr[i].key, mz, mc);
-            v8_to_msgpack(o->Get(k), &mo->via.map.ptr[i].val, mz, mc);
+            Handle<Value> v = o->Get(k);
+            if (!v->IsFunction()) {
+              v8_to_msgpack(k, &mo->via.map.ptr[i].key, mz, mc);
+              v8_to_msgpack(v, &mo->via.map.ptr[i].val, mz, mc);
+            } else {
+              mo->via.map.size--;
+            }
         }
     }
 
